@@ -1,0 +1,197 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
+
+import { CollectionsList } from '@/components/collections-list';
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Colors, Fonts } from '@/constants/theme';
+import { useAuthStore } from '@/store/UseAuthStore';
+
+
+export default function ProfileScreen() {
+  const logout = useAuthStore((state) => state.logout);
+  const [collections, setCollections] = useState([
+    { id: '1', name: 'Summer Cocktails' },
+    { id: '2', name: 'Dinner Favorites' },
+    { id: '3', name: 'Weekend Brunch' },
+    { id: '4', name: 'Mocktails' },
+    { id: '5', name: 'Holiday Drinks' },
+    { id: '6', name: 'After Dinner' },
+  ]);
+
+  return (
+    <ParallaxScrollView>
+
+    <ThemedView style={styles.screen}>
+      <ThemedView style={styles.headerCard} lightColor={Colors.light.secondary} darkColor={Colors.dark.tertiary}>
+        <ThemedView style={styles.avatar} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
+          <ThemedText type="title" style={styles.avatarText}>
+            JD
+          </ThemedText>
+        </ThemedView>
+
+        <ThemedText type="title" style={styles.name}>
+          Jane Doe
+        </ThemedText>
+        <ThemedText style={styles.handle}>@janedoe</ThemedText>
+        <ThemedText style={styles.italic}>
+          "Bartender and Professional Mixer"
+        </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.statsRow}>
+        <ThemedView style={styles.statCard} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
+          <ThemedText type="title" style={styles.statValue}>
+            128
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Recipes</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.statCard} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
+          <ThemedText type="title" style={styles.statValue}>
+            2.4k
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Followers</ThemedText>
+        </ThemedView>
+      </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <CollectionsList
+          collections={collections}
+          onCollectionPress={(collection) => {
+            router.push(`/collections/${collection.id}`);
+          }}
+          onDeleteCollection={(collection) => {
+            Alert.alert(
+              'Delete collection',
+              `Delete ${collection.name} and all recipes saved inside it?`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete',
+                  style: 'destructive',
+                  onPress: () => {
+                    setCollections((currentCollections) =>
+                      currentCollections.filter((item) => item.id !== collection.id),
+                    );
+                  },
+                },
+              ],
+            );
+          }}
+          onCreateCollection={() => {
+            console.log('Create collection');
+          }}
+        />
+      </ThemedView>
+
+      <ThemedView style={styles.footerSpacer} />
+
+      <TouchableOpacity
+        onPress={() => {
+          logout();
+          router.replace('/login');
+        }}
+        style={styles.logoutButton}
+        activeOpacity={0.8}>
+        <ThemedText type="defaultSemiBold" style={styles.logoutButtonText}>
+          Log out
+        </ThemedText>
+      </TouchableOpacity>
+
+    
+
+    </ThemedView>
+    </ParallaxScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    padding: 15,
+    gap: 15,
+  },
+  headerCard: {
+    borderRadius: 28,
+    padding: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  avatarText: {
+    fontFamily: Fonts.body,
+  },
+  name: {
+    textAlign: 'center',
+  },
+  handle: {
+    opacity: 0.7,
+  },
+  bio: {
+    textAlign: 'center',
+    opacity: 0.85,
+    lineHeight: 22,
+    marginTop: 4,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    gap: 5,
+  },
+  statValue: {
+    fontFamily: Fonts.headline,
+  },
+  statLabel: {
+    opacity: 0.7,
+  },
+  section: {
+    gap: 10,
+  },
+  footerSpacer: {
+    flexGrow: 1,
+    minHeight: 40,
+  },
+  sectionText: {
+    lineHeight: 24,
+    opacity: 0.85,
+  },
+  activityItem: {
+    borderRadius: 18,
+    padding: 16,
+    gap: 4,
+  },
+  activityMeta: {
+    opacity: 0.7,
+    fontSize: 14,
+  },
+  italic: {
+    fontStyle: 'italic',
+  },
+  logoutButton: {
+    marginTop: 'auto',
+    borderRadius: 18,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#540212',
+  },
+  logoutButtonText: {
+    color: Colors.light.background,
+  },
+});
