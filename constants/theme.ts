@@ -1,53 +1,46 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    primary: '#4A3728',
+    secondary: '#C2A878',
+    tertiary: '#8B9D83',
+    neutral: '#F9F7F2',
+    text: '#4A3728',
+    background: '#F9F7F2',
+    tint: '#4A3728',
+    icon: '#8B9D83',
+    tabIconDefault: '#C2A878',
+    tabIconSelected: '#4A3728',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    primary: '#D9C5B2',
+    secondary: '#8C6A5D',
+    tertiary: '#402E2A',
+    neutral: '#12100E',
+    text: '#F9F7F2',
+    background: '#12100E',
+    tint: '#D9C5B2',
+    icon: '#8C6A5D',
+    tabIconDefault: '#8C6A5D',
+    tabIconSelected: '#D9C5B2',
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+    headline: 'EB Garamond',
+    body: 'Manrope',
+    label: 'Manrope',
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+    headline: 'EB Garamond',
+    body: 'Manrope',
+    label: 'Manrope',
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    headline: "'EB Garamond', Georgia, serif",
+    body: "'Manrope', system-ui, sans-serif",
+    label: "'Manrope', system-ui, sans-serif",
   },
 });
