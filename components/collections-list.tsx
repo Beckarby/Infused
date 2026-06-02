@@ -171,7 +171,6 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(84, 2, 18, 0.08)',
   },
   deleteButtonPressed: {
     opacity: 0.75,
