@@ -39,7 +39,14 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you choose a recipe image.",
+          "cameraPermission": "The app accesses your camera to take a recipe photo."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
