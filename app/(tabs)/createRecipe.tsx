@@ -72,7 +72,7 @@ export default function CreateRecipeScreen() {
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [recipeSteps, setRecipeSteps] = useState(initialSteps);
   const [cookingTime, setCookingTime] = useState('');
-  const [difficulty, setDifficulty] = useState('Medium');
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
   const [servings, setServings] = useState('2');
 
   const canGoBack = currentStep > 1;
@@ -151,7 +151,6 @@ export default function CreateRecipeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
-      <AppHeader title="Create Recipe"/>
 
       <ThemedView style={[styles.timelineCard, { backgroundColor: sectionBackground, borderColor }]}> 
         <RecipeTimeline steps={TIMELINE_STEPS} currentStep={currentStep} onStepPress={setCurrentStep} />
@@ -309,39 +308,34 @@ export default function CreateRecipeScreen() {
         <ThemedView style={[styles.card, { backgroundColor: sectionBackground, borderColor }]}> 
 
           <View style={styles.fieldGroup}>
-            <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Cooking time</ThemedText>
-            <TextInput
-              value={cookingTime}
-              onChangeText={setCookingTime}
-              placeholder="30 minutes"
-              placeholderTextColor={subtleTextColor}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: fieldBackground,
-                  borderColor,
-                  color: textColor,
-                },
-              ]}
-            />
-          </View>
-
-          <View style={styles.fieldGroup}>
             <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Difficulty</ThemedText>
-            <TextInput
-              value={difficulty}
-              onChangeText={setDifficulty}
-              placeholder="Easy / Medium / Hard"
-              placeholderTextColor={subtleTextColor}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: fieldBackground,
-                  borderColor,
-                  color: textColor,
-                },
-              ]}
-            />
+            <View style={styles.difficultyContainer}>
+              {(['Easy', 'Medium', 'Hard'] as const).map((level) => {
+                const isSelected = difficulty === level;
+                return (
+                  <Pressable
+                    key={level}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    onPress={() => setDifficulty(level)}
+                    style={({ pressed }) => [
+                      styles.difficultyButton,
+                      {
+                        borderColor,
+                        backgroundColor: isSelected ? (isDark ? Colors.dark.tertiary : Colors.light.tertiary) : fieldBackground,
+                      },
+                      pressed && styles.pressed,
+                    ]}>
+                    <ThemedText 
+                      type="defaultSemiBold" 
+                      style={{ color: isSelected ? '#FFFFFF' : textColor }}
+                    >
+                      {level}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <View style={styles.fieldGroup}>
@@ -403,6 +397,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 28,
+    paddingTop: 30,
   },
   timelineCard: {
     marginHorizontal: 16,
@@ -543,5 +538,17 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.85,
+  },
+  difficultyContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  difficultyButton: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
