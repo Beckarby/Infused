@@ -20,8 +20,11 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'chevron.left': 'chevron-left',
   'person.circle': 'person',
+  'photo.on.rectangle': 'photo-library',
+  'camera.fill': 'photo-camera',
   pencil: 'edit',
   trash: 'delete',
+  'plus.circle': 'add-circle',
 } as IconMapping;
 
 /**
