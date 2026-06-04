@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { COLLECTION_RECIPES } from '@/constants/mock-recipes';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -13,11 +14,7 @@ type RecipeItem = {
   name: string;
 };
 
-const INITIAL_RECIPES: RecipeItem[] = [
-  { id: 'r1', name: 'Negroni' },
-  { id: 'r2', name: 'Espresso Martini' },
-  { id: 'r3', name: 'Aperol Spritz' },
-];
+const INITIAL_RECIPES: RecipeItem[] = COLLECTION_RECIPES;
 
 export default function CollectionScreen() {
   const params = useLocalSearchParams<{ collectionId?: string | string[] }>();
@@ -120,10 +117,15 @@ export default function CollectionScreen() {
         <View style={styles.recipeList}>
           {recipes.length > 0 ? (
             recipes.map((recipe) => (
-              <ThemedView
+              <Pressable
                 key={recipe.id}
-                style={[styles.recipeItem, { borderColor }]}
-              >
+                accessibilityRole="button"
+                onPress={() => router.push(`/recipes/${recipe.id}`)}
+                style={({ pressed }) => [
+                  styles.recipeItem,
+                  { borderColor, backgroundColor: recipeBackground },
+                  pressed && styles.recipeItemPressed,
+                ]}>
                 <ThemedText type="defaultSemiBold" style={[styles.recipeName, { color: textColor }]}> 
                   {recipe.name}
                 </ThemedText>
@@ -131,7 +133,8 @@ export default function CollectionScreen() {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Delete ${recipe.name}`}
-                  onPress={() => {
+                  onPress={(event) => {
+                    event.stopPropagation();
                     Alert.alert('Delete recipe', `Remove ${recipe.name} from this collection?`, [
                       { text: 'Cancel', style: 'cancel' },
                       {
@@ -144,7 +147,7 @@ export default function CollectionScreen() {
                   style={({ pressed }) => [styles.iconButton, pressed && styles.buttonPressed]}>
                   <IconSymbol name="trash" size={18} color={accentColor} />
                 </Pressable>
-              </ThemedView>
+              </Pressable>
             ))
           ) : (
             <ThemedView style={[styles.emptyState, { backgroundColor: recipeBackground, borderColor }]}> 
@@ -245,6 +248,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,
+  },
+  recipeItemPressed: {
+    opacity: 0.85,
   },
   recipeName: {
     flex: 1,

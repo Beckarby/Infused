@@ -1,18 +1,13 @@
+import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
+import { AppHeader } from '@/components/app-header';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { RecipeList } from '@/components/recipe-list';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AppHeader } from '@/components/app-header';
+import { MOCK_RECIPES } from '@/constants/mock-recipes';
 import { Colors } from '@/constants/theme';
-import { RecipeList } from '@/components/recipe-list';
-
-const RECIPES = [
-  { id: '1', name: 'Negroni', creatorName: 'Jane Doe', difficulty: 'Medium' },
-  { id: '2', name: 'Espresso Martini', creatorName: 'Alex Stone', difficulty: 'Hard' },
-  { id: '3', name: 'Aperol Spritz', creatorName: 'Maria Lopez', difficulty: 'Easy' },
-  { id: '4', name: 'Margarita', creatorName: 'Taylor Reed', difficulty: 'Medium' },
-];
 
 export default function HomeScreen() {
   return (
@@ -35,7 +30,12 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <RecipeList recipes={RECIPES} />
+        <RecipeList
+          recipes={MOCK_RECIPES}
+          onRecipePress={(recipe) => {
+            router.push(`/recipes/${recipe.id}`);
+          }}
+        />
       </ThemedView>
       
     </ParallaxScrollView>
