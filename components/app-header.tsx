@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 type AppHeaderProps = {
   title?: string;
@@ -12,6 +13,7 @@ type AppHeaderProps = {
 
 export function AppHeader({ title = 'Infused', onReturnPress }: AppHeaderProps) {
   const borderColor = useThemeColor({}, 'secondary');
+  const iconColor = useThemeColor({}, 'icon');
 
   return (
     <ThemedView style={[styles.container, { borderBottomColor: borderColor }]}>
@@ -24,7 +26,7 @@ export function AppHeader({ title = 'Infused', onReturnPress }: AppHeaderProps) 
           styles.returnButton,
           pressed && styles.returnButtonPressed,
         ]}>
-        <ThemedText type="defaultSemiBold">← Return</ThemedText>
+        <IconSymbol name="chevron.left" size={28} color={iconColor} />
       </Pressable>
       ) : (
         <View style={styles.returnButtonPlaceholder} />
@@ -45,16 +47,13 @@ export function AppHeader({ title = 'Infused', onReturnPress }: AppHeaderProps) 
 const styles = StyleSheet.create({
   container: {
     minHeight: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 18,
     flexDirection: 'row',
     alignItems: 'center',
   },
   returnButton: {
-    minWidth: 96,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    minWidth: 100,
+    paddingVertical: 7,
   },
   returnButtonPressed: {
     opacity: 0.75,
@@ -63,7 +62,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   returnButtonPlaceholder: {
-    width: 96,
+    width: 100,
   },
   title: {
     flex: 1,
@@ -72,6 +71,6 @@ const styles = StyleSheet.create({
     // fontWeight: '600',
   },
   sideSpacer: {
-    width: 96,
+    width: 100,
   },
 });

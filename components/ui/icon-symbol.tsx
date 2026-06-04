@@ -25,6 +25,7 @@ const MAPPING = {
   pencil: 'edit',
   trash: 'delete',
   'plus.circle': 'add-circle',
+  'book.fill': 'menu-book',
 } as IconMapping;
 
 /**
