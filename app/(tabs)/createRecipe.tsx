@@ -1,23 +1,24 @@
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    Alert,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    View,
-    useColorScheme,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+  View,
+  type ImageSourcePropType,
 } from 'react-native';
 
-import { AppHeader } from '@/components/app-header';
 import { RecipeTimeline, type TimelineStep } from '@/components/recipe-timeline';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
+import { useRecipeStore } from '@/store/UseRecipeStore';
 
 type EditableItem = {
   id: string;
@@ -55,8 +56,22 @@ const initialSteps: EditableItem[] = [
 ];
 
 export default function CreateRecipeScreen() {
+  const params = useLocalSearchParams<{ id?: string | string[] }>();
   const theme = useColorScheme() ?? 'light';
   const isDark = theme === 'dark';
+  const recipes = useRecipeStore((state) => state.recipes);
+  const addRecipe = useRecipeStore((state) => state.addRecipe);
+  const updateRecipe = useRecipeStore((state) => state.updateRecipe);
+
+  const editingRecipeId = useMemo(() => {
+    const value = params.id;
+    return Array.isArray(value) ? value[0] : value;
+  }, [params.id]);
+
+  const editingRecipe = useMemo(
+    () => recipes.find((recipe) => recipe.id === editingRecipeId),
+    [editingRecipeId, recipes],
+  );
 
   const pageBackground = isDark ? Colors.dark.background : Colors.light.background;
   const sectionBackground = isDark ? Colors.dark.neutral : Colors.light.neutral;
@@ -68,7 +83,7 @@ export default function CreateRecipeScreen() {
   const [currentStep, setCurrentStep] = useState(1);
   const [recipeTitle, setRecipeTitle] = useState('');
   const [recipeDescription, setRecipeDescription] = useState('');
-  const [recipeImage, setRecipeImage] = useState<string | null>(null);
+  const [recipeImage, setRecipeImage] = useState<ImageSourcePropType | null>(null);
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [recipeSteps, setRecipeSteps] = useState(initialSteps);
   const [cookingTime, setCookingTime] = useState('');
@@ -118,7 +133,7 @@ export default function CreateRecipeScreen() {
       return;
     }
 
-    setRecipeImage(result.assets[0].uri);
+    setRecipeImage({ uri: result.assets[0].uri });
   };
 
   const takeRecipeImage = async () => {
@@ -139,15 +154,67 @@ export default function CreateRecipeScreen() {
       return;
     }
 
-    setRecipeImage(result.assets[0].uri);
+    setRecipeImage({ uri: result.assets[0].uri });
   };
 
   const uploadRecipe = () => {
-    // endpoint connection here
+    const payload = {
+      creatorName: editingRecipe?.creatorName ?? 'You',
+      name: recipeTitle.trim(),
+      description: recipeDescription.trim(),
+      image: recipeImage ?? undefined,
+      ingredients: ingredients.map((ingredient) => ingredient.value).filter(Boolean),
+      steps: recipeSteps.map((step) => step.value).filter(Boolean),
+      cookingTime: cookingTime.trim() || '5 min',
+      difficulty,
+      servings: servings.trim() || '1',
+    };
+
+    if (editingRecipe) {
+      updateRecipe(editingRecipe.id, payload);
+    } else {
+      addRecipe(payload);
+    }
+
     router.back();
   };
 
   const titleMaxLength = useMemo(() => 40, []);
+
+  useEffect(() => {
+    if (editingRecipe) {
+      setRecipeTitle(editingRecipe.name);
+      setRecipeDescription(editingRecipe.description);
+      setRecipeImage(editingRecipe.image ?? null);
+      setIngredients(
+        editingRecipe.ingredients.map((value, index) => ({
+          id: `ingredient-${index + 1}`,
+          value,
+        })),
+      );
+      setRecipeSteps(
+        editingRecipe.steps.map((value, index) => ({
+          id: `step-${index + 1}`,
+          value,
+        })),
+      );
+      setCookingTime(editingRecipe.cookingTime);
+      setDifficulty(editingRecipe.difficulty);
+      setServings(editingRecipe.servings);
+      setCurrentStep(1);
+      return;
+    }
+
+    setRecipeTitle('');
+    setRecipeDescription('');
+    setRecipeImage(null);
+    setIngredients(initialIngredients);
+    setRecipeSteps(initialSteps);
+    setCookingTime('');
+    setDifficulty('Medium');
+    setServings('2');
+    setCurrentStep(1);
+  }, [editingRecipe]);
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
@@ -206,7 +273,7 @@ export default function CreateRecipeScreen() {
               onPress={pickRecipeImage}
               style={({ pressed }) => [styles.imagePicker, { borderColor }, pressed && styles.pressed]}>
               {recipeImage ? (
-                <Image source={{ uri: recipeImage }} style={styles.previewImage} />
+                <Image source={recipeImage} style={styles.previewImage} />
               ) : (
                 <View style={styles.imagePlaceholderContent}>
                   <ThemedText style={[styles.imagePickerText, { color: subtleTextColor }]}>Add a recipe image</ThemedText>
@@ -383,7 +450,7 @@ export default function CreateRecipeScreen() {
             accessibilityRole="button"
             onPress={uploadRecipe}
             style={({ pressed }) => [styles.primaryAction, pressed && styles.pressed]}>
-            <ThemedText type="defaultSemiBold" style={styles.primaryActionText}>Upload recipe</ThemedText>
+            <ThemedText type="defaultSemiBold" style={styles.primaryActionText}>{editingRecipe ? 'Save changes' : 'Upload recipe'}</ThemedText>
           </Pressable>
         )}
       </View>

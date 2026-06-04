@@ -6,10 +6,12 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { RecipeList } from '@/components/recipe-list';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { MOCK_RECIPES } from '@/constants/mock-recipes';
 import { Colors } from '@/constants/theme';
+import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function HomeScreen() {
+  const recipes = useRecipeStore((state) => state.recipes);
+
   return (
     <ParallaxScrollView>
       <AppHeader title="Infused" />
@@ -31,7 +33,7 @@ export default function HomeScreen() {
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <RecipeList
-          recipes={MOCK_RECIPES}
+          recipes={recipes}
           onRecipePress={(recipe) => {
             router.push(`/recipes/${recipe.id}`);
           }}

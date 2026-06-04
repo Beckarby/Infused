@@ -8,6 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { COLLECTION_RECIPES } from '@/constants/mock-recipes';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRecipeStore } from '@/store/UseRecipeStore';
 
 type RecipeItem = {
   id: string;
@@ -39,6 +40,12 @@ export default function CollectionScreen() {
   const [draftName, setDraftName] = useState(collectionName);
   const [isEditingName, setIsEditingName] = useState(false);
   const [recipes, setRecipes] = useState(INITIAL_RECIPES);
+  const allRecipes = useRecipeStore((state) => state.recipes);
+
+  const visibleRecipes = useMemo(
+    () => recipes.filter((recipe) => allRecipes.some((item) => item.id === recipe.id)),
+    [allRecipes, recipes],
+  );
 
   const beginEditName = () => {
     setDraftName(collectionName);
@@ -115,8 +122,8 @@ export default function CollectionScreen() {
         <ThemedText type="defaultSemiBold" style={[styles.sectionTitle, { color: textColor }]}>Recipes</ThemedText>
 
         <View style={styles.recipeList}>
-          {recipes.length > 0 ? (
-            recipes.map((recipe) => (
+          {visibleRecipes.length > 0 ? (
+            visibleRecipes.map((recipe) => (
               <Pressable
                 key={recipe.id}
                 accessibilityRole="button"

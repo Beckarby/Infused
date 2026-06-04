@@ -5,13 +5,18 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-nat
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { getMockRecipeById, MOCK_COLLECTION_NAMES } from '@/constants/mock-recipes';
+import { MOCK_COLLECTION_NAMES } from '@/constants/mock-recipes';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function RecipeScreen() {
 	const params = useLocalSearchParams<{ id?: string | string[] }>();
-	const recipe = useMemo(() => getMockRecipeById(params.id), [params.id]);
+	const recipes = useRecipeStore((state) => state.recipes);
+	const recipe = useMemo(() => {
+		const normalizedId = Array.isArray(params.id) ? params.id[0] : params.id;
+		return recipes.find((item) => item.id === normalizedId);
+	}, [params.id, recipes]);
 
 	const theme = useColorScheme() ?? 'light';
 	const isDark = theme === 'dark';
@@ -43,7 +48,7 @@ export default function RecipeScreen() {
 
 	return (
         <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
-            <AppHeader title="Infused"  onReturnPress={router.back}/>
+			<AppHeader title='Infused' onReturnPress={() => router.back()} />
 			<ThemedView style={[styles.heroCard, { backgroundColor: cardBackground, borderColor }]}>
 				{recipe.image ? <Image source={recipe.image} style={styles.heroImage} resizeMode="cover" /> : null}
 
