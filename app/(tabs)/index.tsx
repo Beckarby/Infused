@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
@@ -11,6 +12,10 @@ import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function HomeScreen() {
   const recipes = useRecipeStore((state) => state.recipes);
+  const sortedRecipes = useMemo(
+    () => [...recipes].sort((a, b) => a.name.localeCompare(b.name)),
+    [recipes],
+  );
 
   return (
     <ParallaxScrollView>
@@ -20,6 +25,7 @@ export default function HomeScreen() {
           type="title"
           lightColor={Colors.light.primary}
           darkColor={Colors.dark.primary}
+          style={styles.title}
           >
             Find your
           </ThemedText>
@@ -33,7 +39,7 @@ export default function HomeScreen() {
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <RecipeList
-          recipes={recipes}
+          recipes={sortedRecipes}
           onRecipePress={(recipe) => {
             router.push(`/recipes/${recipe.id}`);
           }}
@@ -48,8 +54,8 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 15,
+    gap: 5,
+    marginBottom: 10,
   },
   stepContainer: {
     gap: 15,
@@ -57,6 +63,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontStyle: 'italic',
-
+    alignItems: 'center',
+    paddingLeft: 16,
   },
 });
