@@ -1,25 +1,46 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, Pressable, StyleSheet, TouchableOpacity, View, useColorScheme } from 'react-native';
 
 import { CollectionsList } from '@/components/collections-list';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
 import { useAuthStore } from '@/store/UseAuthStore';
+import { useCollectionStore } from '@/store/UseCollectionStore';
+import { useProfileStore } from '@/store/UseProfileStore';
 
 
 export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
-  const [collections, setCollections] = useState([
-    { id: '1', name: 'Summer Cocktails' },
-    { id: '2', name: 'Dinner Favorites' },
-    { id: '3', name: 'Weekend Brunch' },
-    { id: '4', name: 'Mocktails' },
-    { id: '5', name: 'Holiday Drinks' },
-    { id: '6', name: 'After Dinner' },
-  ]);
+  const name = useProfileStore((state) => state.name);
+  const handle = useProfileStore((state) => state.handle);
+  const description = useProfileStore((state) => state.description);
+  const resetProfile = useProfileStore((state) => state.resetProfile);
+  const collections = useCollectionStore((state) => state.collections);
+  const deleteCollection = useCollectionStore((state) => state.deleteCollection);
+  const resetCollections = useCollectionStore((state) => state.resetCollections);
+
+  const theme = useColorScheme() ?? 'light';
+  const isDark = theme === 'dark';
+  const textColor = isDark ? Colors.dark.text : Colors.light.text;
+
+    const deleteProfile = () => {
+    Alert.alert('Delete profile', 'This will remove your profile data and sign you out. Do you want to continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          resetProfile();
+          resetCollections();
+          logout();
+          router.replace('/login');
+        },
+      },
+    ]);
+  };
 
   return (
     <ParallaxScrollView>
@@ -32,12 +53,23 @@ export default function ProfileScreen() {
           </ThemedText>
         </ThemedView>
 
-        <ThemedText type="title" style={styles.name}>
-          Jane Doe
-        </ThemedText>
-        <ThemedText style={styles.handle}>@janedoe</ThemedText>
+        <View style={styles.nameRow}>
+          <ThemedText type="title" style={styles.name}>
+            {name}
+          </ThemedText>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Edit profile"
+            onPress={() => router.push('/profile-edit')}
+            style={({ pressed }) => [styles.editButton, pressed && styles.buttonPressed]}>
+            <IconSymbol name="pencil" size={18} color={textColor} />
+          </Pressable>
+        </View>
+
+        <ThemedText style={styles.handle}>{handle}</ThemedText>
         <ThemedText style={styles.italic}>
-          "Bartender and Professional Mixer"
+          "{description}"
         </ThemedText>
       </ThemedView>
 
@@ -72,19 +104,27 @@ export default function ProfileScreen() {
                   text: 'Delete',
                   style: 'destructive',
                   onPress: () => {
-                    setCollections((currentCollections) =>
-                      currentCollections.filter((item) => item.id !== collection.id),
-                    );
+                    deleteCollection(collection.id);
                   },
                 },
               ],
             );
           }}
           onCreateCollection={() => {
-            console.log('Create collection');
+            router.push('/modal?mode=create-collection');
           }}
         />
       </ThemedView>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Delete profile"
+        onPress={deleteProfile}
+        style={({ pressed }) => [styles.deleteProfileButton, pressed && styles.buttonPressed]}>
+        <ThemedText type="defaultSemiBold" style={styles.deleteProfileButtonText}>
+          Delete profile
+        </ThemedText>
+      </Pressable>
 
       <ThemedView style={styles.footerSpacer} />
 
@@ -110,8 +150,9 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    padding: 15,
     gap: 15,
+    paddingBottom: 24,
+    paddingTop: 30,
   },
   headerCard: {
     borderRadius: 28,
@@ -132,6 +173,12 @@ const styles = StyleSheet.create({
   },
   name: {
     textAlign: 'center',
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   handle: {
     opacity: 0.7,
@@ -183,6 +230,23 @@ const styles = StyleSheet.create({
   italic: {
     fontStyle: 'italic',
   },
+  editButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteProfileButton: {
+    borderRadius: 18,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#540212',
+  },
+  deleteProfileButtonText: {
+    color: Colors.light.background,
+  },
   logoutButton: {
     marginTop: 'auto',
     borderRadius: 18,
@@ -193,5 +257,8 @@ const styles = StyleSheet.create({
   },
   logoutButtonText: {
     color: Colors.light.background,
+  },
+  buttonPressed: {
+    opacity: 0.85,
   },
 });
