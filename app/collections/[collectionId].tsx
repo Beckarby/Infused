@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -66,6 +67,7 @@ export default function CollectionScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
+      <AppHeader title="Collection" onReturnPress={() => router.back()} />
       <ThemedView style={[styles.card, { backgroundColor: cardBackground, borderColor }]}> 
         <View style={styles.titleRow}>
           {isEditingName ? (
@@ -163,15 +165,6 @@ export default function CollectionScreen() {
           )}
         </View>
       </ThemedView>
-
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.back()}
-        style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}>
-        <ThemedText type="defaultSemiBold" style={styles.backButtonText}>
-          Back
-        </ThemedText>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -182,7 +175,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    gap: 14,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   card: {
     borderRadius: 24,
@@ -192,7 +186,7 @@ const styles = StyleSheet.create({
   },
   cardRecipes: {
     borderRadius: 24,
-    padding: 18,
+    padding: 15,
     gap: 14,
   },
   titleRow: {

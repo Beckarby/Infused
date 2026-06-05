@@ -24,7 +24,6 @@ export default function LibraryScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
-      <AppHeader title="Library" />
 
       <ThemedView style={[styles.introCard, { backgroundColor: cardBackground, borderColor }]}> 
         <ThemedText type="title" style={[styles.title, { color: textColor }]}>My Recipes</ThemedText>
@@ -48,7 +47,7 @@ export default function LibraryScreen() {
               <Pressable
                 accessibilityRole="button"
                 onPress={() => router.push({ pathname: '/createRecipe', params: { id: recipe.id } })}
-                style={({ pressed }) => [styles.editButton, { borderColor, backgroundColor: mutedBackground }, pressed && styles.pressed]}>
+                style={({ pressed }) => [styles.editButton, { borderColor }, pressed && styles.pressed]}>
                 <ThemedText type="defaultSemiBold" style={[styles.buttonText, { color: textColor }]}>Edit</ThemedText>
               </Pressable>
 
@@ -82,6 +81,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 24,
+    paddingTop: 30,
   },
   introCard: {
     marginHorizontal: 16,
