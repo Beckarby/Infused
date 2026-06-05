@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -89,11 +89,40 @@ export default function CreateRecipeScreen() {
   const [cookingTime, setCookingTime] = useState('');
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
   const [servings, setServings] = useState('2');
+  const [stepError, setStepError] = useState('');
 
   const canGoBack = currentStep > 1;
   const canGoForward = currentStep < 3;
 
-  const nextStep = () => setCurrentStep((value) => Math.min(3, value + 1));
+  const validateStep = (step: number): boolean => {
+    setStepError('');
+    if (step === 1 && !recipeTitle.trim()) {
+      setStepError('Recipe title is required');
+      return false;
+    }
+    if (step === 2) {
+      const hasIngredient = ingredients.some((i) => i.value.trim());
+      const hasStep = recipeSteps.some((s) => s.value.trim());
+      if (!hasIngredient && !hasStep) {
+        setStepError('Add at least one ingredient and one step');
+        return false;
+      }
+      if (!hasIngredient) {
+        setStepError('Add at least one ingredient');
+        return false;
+      }
+      if (!hasStep) {
+        setStepError('Add at least one step');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const nextStep = () => {
+    if (!validateStep(currentStep)) return;
+    setCurrentStep((value) => Math.min(3, value + 1));
+  };
   const previousStep = () => setCurrentStep((value) => Math.max(1, value - 1));
 
   const updateIngredient = (id: string, value: string) => {
@@ -158,6 +187,7 @@ export default function CreateRecipeScreen() {
   };
 
   const uploadRecipe = () => {
+    if (!validateStep(1) || !validateStep(2)) return;
     const payload = {
       creatorName: editingRecipe?.creatorName ?? 'You',
       name: recipeTitle.trim(),
@@ -176,13 +206,28 @@ export default function CreateRecipeScreen() {
       addRecipe(payload);
     }
 
+    resetForm();
     router.back();
   };
 
+  const resetForm = () => {
+    setRecipeTitle('');
+    setRecipeDescription('');
+    setRecipeImage(null);
+    setIngredients(initialIngredients);
+    setRecipeSteps(initialSteps);
+    setCookingTime('');
+    setDifficulty('Medium');
+    setServings('2');
+    setCurrentStep(1);
+    setStepError('');
+  };
+
   const titleMaxLength = useMemo(() => 40, []);
+  const populatedForId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (editingRecipe) {
+    if (editingRecipe && populatedForId.current !== editingRecipeId) {
       setRecipeTitle(editingRecipe.name);
       setRecipeDescription(editingRecipe.description);
       setRecipeImage(editingRecipe.image ?? null);
@@ -202,19 +247,16 @@ export default function CreateRecipeScreen() {
       setDifficulty(editingRecipe.difficulty);
       setServings(editingRecipe.servings);
       setCurrentStep(1);
+      populatedForId.current = editingRecipeId;
+      setStepError('');
       return;
     }
 
-    setRecipeTitle('');
-    setRecipeDescription('');
-    setRecipeImage(null);
-    setIngredients(initialIngredients);
-    setRecipeSteps(initialSteps);
-    setCookingTime('');
-    setDifficulty('Medium');
-    setServings('2');
-    setCurrentStep(1);
-  }, [editingRecipe]);
+    if (!editingRecipeId) {
+      populatedForId.current = undefined;
+      resetForm();
+    }
+  }, [editingRecipeId, editingRecipe]);
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
@@ -230,7 +272,10 @@ export default function CreateRecipeScreen() {
             <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Recipe title</ThemedText>
             <TextInput
               value={recipeTitle}
-              onChangeText={setRecipeTitle}
+              onChangeText={(text) => {
+                setRecipeTitle(text);
+                if (stepError) setStepError('');
+              }}
               maxLength={titleMaxLength}
               placeholder="Enter recipe title"
               placeholderTextColor={subtleTextColor}
@@ -264,6 +309,8 @@ export default function CreateRecipeScreen() {
               ]}
             />
           </View>
+
+          {stepError ? <ThemedText style={styles.errorText}>{stepError}</ThemedText> : null}
 
           <View style={styles.fieldGroup}>
             <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Recipe image</ThemedText>
@@ -368,6 +415,8 @@ export default function CreateRecipeScreen() {
               </Pressable>
             </View>
           </View>
+
+          {stepError ? <ThemedText style={styles.errorText}>{stepError}</ThemedText> : null}
         </ThemedView>
       ) : null}
 
@@ -602,6 +651,11 @@ const styles = StyleSheet.create({
   primaryActionText: {
     color: Colors.light.background,
     fontFamily: Fonts.label,
+  },
+  errorText: {
+    color: '#D32F2F',
+    fontFamily: Fonts.label,
+    fontSize: 13,
   },
   pressed: {
     opacity: 0.85,

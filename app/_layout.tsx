@@ -57,7 +57,8 @@ export default function RootLayout() {
     <ThemeProvider value={navigationTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="modal" options={{  headerShown: false }} />
+        <Stack.Screen name="profile-edit" options={{ headerShown: false }} />
         <Stack.Screen name="collections/[collectionId]" options={{ headerShown: false }} />
         <Stack.Screen name="recipes/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
