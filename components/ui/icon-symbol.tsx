@@ -26,6 +26,8 @@ const MAPPING = {
   trash: 'delete',
   'plus.circle': 'add-circle',
   'book.fill': 'menu-book',
+  eye: 'visibility',
+  'eye.slash': 'visibility-off',
 } as IconMapping;
 
 /**

@@ -53,14 +53,14 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={navigationTheme}>
-      <Stack>
+      <Stack screenOptions={{ animation: 'slide_from_right' }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{  headerShown: false }} />
-        <Stack.Screen name="profile-edit" options={{ headerShown: false }} />
-        <Stack.Screen name="collections/[collectionId]" options={{ headerShown: false }} />
-        <Stack.Screen name="recipes/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{  headerShown: false, animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="profile-edit" options={{ headerShown: false, gestureEnabled: true }} />
+        <Stack.Screen name="collections/[collectionId]" options={{ headerShown: false, gestureEnabled: true }} />
+        <Stack.Screen name="recipes/[id]" options={{ headerShown: false, gestureEnabled: true }} />
+        <Stack.Screen name="sign-in" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
 
       </Stack>
       <StatusBar style="auto" />

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
@@ -69,6 +69,7 @@ export default function CollectionScreen() {
   };
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
       <AppHeader title="Collection" onReturnPress={() => router.back()} />
       <ThemedView style={[styles.card, { backgroundColor: cardBackground, borderColor }]}> 
@@ -169,6 +170,7 @@ export default function CollectionScreen() {
         </View>
       </ThemedView>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -9,7 +9,7 @@ export type RecipeListItem = {
   id: string;
   name: string;
   creatorName: string;
-  difficulty: string;
+  difficulty?: string;
   image?: ImageSourcePropType;
 };
 
@@ -52,12 +52,14 @@ export function RecipeList({ recipes, onRecipePress }: RecipeListProps) {
                   </ThemedText>
                 </View>
 
-                <View style={styles.metaRow}>
-                  <ThemedText style={[styles.metaLabel, { color: subtleTextColor }]}>Difficulty</ThemedText>
-                  <ThemedText type="defaultSemiBold" style={[styles.metaValue, { color: textColor }]}> 
-                    {recipe.difficulty}
-                  </ThemedText>
-                </View>
+                {recipe.difficulty ? (
+                  <View style={styles.metaRow}>
+                    <ThemedText style={[styles.metaLabel, { color: subtleTextColor }]}>Difficulty</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={[styles.metaValue, { color: textColor }]}> 
+                      {recipe.difficulty}
+                    </ThemedText>
+                  </View>
+                ) : null}
               </View>
 
               {recipe.image ? (
