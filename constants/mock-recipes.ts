@@ -8,9 +8,9 @@ export type MockRecipe = {
   image?: ImageSourcePropType;
   ingredients: string[];
   steps: string[];
-  cookingTime: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  servings: string;
+  cookingTime?: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  servings?: string;
 };
 
 export const MOCK_RECIPES: MockRecipe[] = [

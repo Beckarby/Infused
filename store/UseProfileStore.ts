@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { UserData } from '@/store/UseAuthStore';
 
 interface ProfileState {
   name: string;
@@ -6,16 +7,23 @@ interface ProfileState {
   description: string;
   updateProfile: (profile: { name: string; handle: string; description: string }) => void;
   resetProfile: () => void;
+  initializeFromUserData: (userData: UserData) => void;
 }
 
-const INITIAL_PROFILE = {
-  name: 'Jane Doe',
-  handle: '@janedoe',
-  description: 'Bartender and Professional Mixer',
+const DEFAULT_PROFILE = {
+  name: '',
+  handle: '',
+  description: '',
 };
 
 export const useProfileStore = create<ProfileState>((set) => ({
-  ...INITIAL_PROFILE,
+  ...DEFAULT_PROFILE,
   updateProfile: (profile) => set(profile),
-  resetProfile: () => set(INITIAL_PROFILE),
+  resetProfile: () => set(DEFAULT_PROFILE),
+  initializeFromUserData: (userData) =>
+    set({
+      name: `${userData.users_first_name} ${userData.users_last_name}`,
+      handle: `@${userData.users_name}`,
+      description: userData.users_description ?? '',
+    }),
 }));
