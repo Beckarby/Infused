@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -10,6 +13,8 @@ import {
 
 import { Link, useRouter } from 'expo-router';
 
+import { FadeIn } from '@/components/fade-in';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts } from '@/constants/theme';
@@ -17,7 +22,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/store/UseAuthStore';
 
 type FormData = {
-  email: string;
+  username: string;
   password: string;
 };
 
@@ -31,24 +36,26 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
 
   const { login, isLoading, error } = useAuthStore();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: FormData) => {
-    await login(data.email, data.password);
+    await login(data.username, data.password);
     if (useAuthStore.getState().isAuthenticated) {
       router.replace('/');
     }
   };
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.card, { backgroundColor: colors.neutral }]}>
+      <FadeIn><View style={[styles.card, { backgroundColor: colors.neutral }]}>
 
         <ThemedText
           type="title"
@@ -108,34 +115,27 @@ export default function LoginScreen() {
                 color: colors.text,
               },
             ]}>
-            Email
+            Username
           </ThemedText>
 
           <Controller
             control={control}
-            name="email"
-            rules={{
-              required: 'Email is required',
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: 'Enter a valid email address',
-              },
-            }}
+            name="username"
+            rules={{ required: 'Username is required' }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[
                   styles.input,
                   {
                     backgroundColor: colors.background,
-                    borderColor: errors.email ? colors.secondary : colors.tertiary,
+                    borderColor: errors.username ? colors.secondary : colors.tertiary,
                     color: colors.text,
                     fontFamily: Fonts.body,
                   },
                 ]}
-                placeholder="Enter your email"
+                placeholder="Enter your username"
                 placeholderTextColor={colors.icon}
                 autoCapitalize="none"
-                keyboardType="email-address"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -143,7 +143,7 @@ export default function LoginScreen() {
             )}
           />
 
-          {errors.email ? (
+          {errors.username ? (
             <ThemedText
               style={[
                 styles.errorText,
@@ -152,7 +152,7 @@ export default function LoginScreen() {
                   fontFamily: Fonts.label,
                 },
               ]}>
-              {errors.email.message}
+              {errors.username.message}
             </ThemedText>
           ) : null}
         </View>
@@ -181,23 +181,36 @@ export default function LoginScreen() {
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: errors.password ? colors.secondary : colors.tertiary,
-                    color: colors.text,
-                    fontFamily: Fonts.body,
-                  },
-                ]}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.icon}
-                secureTextEntry
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+              <View style={styles.passwordRow}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    {
+                      backgroundColor: colors.background,
+                      borderColor: errors.password ? colors.secondary : colors.tertiary,
+                      color: colors.text,
+                      fontFamily: Fonts.body,
+                    },
+                  ]}
+                  placeholder="Enter your password"
+                  placeholderTextColor={colors.icon}
+                  secureTextEntry={!showPassword}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((v) => !v)}
+                  style={styles.eyeButton}
+                >
+                  <IconSymbol
+                    name={showPassword ? 'eye.slash' : 'eye'}
+                    size={22}
+                    color={colors.icon}
+                  />
+                </Pressable>
+              </View>
             )}
           />
 
@@ -272,8 +285,9 @@ export default function LoginScreen() {
              
 
         </View>
-      </View>
+      </View></FadeIn>
     </ThemedView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -281,7 +295,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    paddingTop: 15,
+    paddingHorizontal: 24,
   },
   card: {
     borderRadius: 28,
@@ -289,14 +304,15 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   header: {
-    fontSize: 32,
+    fontSize: 35,
     lineHeight: 36,
     textAlign: 'center',
   },
   appTitle: {
     fontSize: 35,
-    lineHeight: 150,
+    lineHeight: 42,
     textAlign: 'center',
+    fontStyle: 'italic',
   },
   subtitle: {
     fontSize: 15,
@@ -321,6 +337,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
+  },
+  passwordRow: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 44,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    zIndex: 10,
   },
   errorText: {
     fontSize: 12,

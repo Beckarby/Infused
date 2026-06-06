@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { authService } from '@/services/auth';
 import { useProfileStore } from '@/store/UseProfileStore';
 import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useAuthStore } from '@/store/UseAuthStore';
@@ -21,7 +22,7 @@ export default function ProfileEditScreen() {
   const resetProfile = useProfileStore((state) => state.resetProfile);
   const resetCollections = useCollectionStore((state) => state.resetCollections);
   const logout = useAuthStore((state) => state.logout);
-  
+  const user = useAuthStore((state) => state.user);
 
   const [draftName, setDraftName] = useState(name);
   const [draftHandle, setDraftHandle] = useState(handle);
@@ -40,12 +41,41 @@ export default function ProfileEditScreen() {
     setDraftDescription(description);
   }, [name, handle, description]);
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
+    const newName = draftName.trim() || name;
+    const newHandle = draftHandle.trim() || handle;
+    const newDescription = draftDescription.trim() || description;
+
     updateProfile({
-      name: draftName.trim() || name,
-      handle: draftHandle.trim() || handle,
-      description: draftDescription.trim() || description,
+      name: newName,
+      handle: newHandle,
+      description: newDescription,
     });
+
+    try {
+      // update description (option 4)
+      if (newDescription !== description) {
+        await authService.updateUser(4, newDescription);
+      }
+      // update username (option 0) — strip @ prefix
+      const newUsername = newHandle.replace('@', '');
+      const oldUsername = handle.replace('@', '');
+      if (newUsername !== oldUsername) {
+        await authService.updateUser(0, newUsername);
+      }
+      // update first/last name from full name (option 2 / 3)
+      const nameParts = newName.split(' ');
+      const newFirstName = nameParts[0] || '';
+      const newLastName = nameParts.slice(1).join(' ') || '';
+      if (newFirstName !== (user?.users_first_name ?? '')) {
+        await authService.updateUser(2, newFirstName);
+      }
+      if (newLastName !== (user?.users_last_name ?? '')) {
+        await authService.updateUser(3, newLastName);
+      }
+    } catch {
+      // local state already updated; API failure is non-blocking
+    }
 
     router.back();
   };
@@ -67,6 +97,7 @@ export default function ProfileEditScreen() {
   }
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
       <AppHeader title="Edit profile" onReturnPress={() => router.back()} />
 
@@ -126,6 +157,7 @@ export default function ProfileEditScreen() {
         </ThemedText>
       </Pressable>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

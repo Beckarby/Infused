@@ -1,23 +1,31 @@
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRecipeStore } from '@/store/UseRecipeStore';
+import { useAuthStore } from '@/store/UseAuthStore';
 
 export default function LibraryScreen() {
   const theme = useColorScheme() ?? 'light';
   const isDark = theme === 'dark';
 
   const recipes = useRecipeStore((state) => state.recipes);
+  const fetchRecipes = useRecipeStore((state) => state.fetchRecipes);
   const deleteRecipe = useRecipeStore((state) => state.deleteRecipe);
+  const username = useAuthStore((state) => state.user?.users_name);
+
+  const myRecipes = recipes.filter((r) => r.creatorName === username);
+
+  useEffect(() => {
+    if (recipes.length === 0) fetchRecipes();
+  }, [fetchRecipes, recipes.length]);
 
   const pageBackground = isDark ? Colors.dark.background : Colors.light.background;
   const cardBackground = isDark ? Colors.dark.neutral : Colors.light.neutral;
-  const mutedBackground = isDark ? Colors.dark.tertiary : Colors.light.tertiary;
   const textColor = isDark ? Colors.dark.text : Colors.light.text;
   const subtleTextColor = isDark ? Colors.dark.primary : Colors.light.primary;
   const borderColor = isDark ? 'rgba(249, 247, 242, 0.18)' : 'rgba(74, 55, 40, 0.14)';
@@ -31,7 +39,7 @@ export default function LibraryScreen() {
       </ThemedView>
 
       <View style={styles.list}>
-        {recipes.map((recipe) => (
+        {myRecipes.map((recipe) => (
           <ThemedView key={recipe.id} style={[styles.card, { backgroundColor: cardBackground, borderColor }]}> 
             <Pressable
               accessibilityRole="button"
@@ -39,7 +47,9 @@ export default function LibraryScreen() {
               style={({ pressed }) => [styles.cardBody, pressed && styles.pressed]}>
               <ThemedText type="subtitle" style={[styles.recipeName, { color: textColor }]}>{recipe.name}</ThemedText>
               <ThemedText style={[styles.meta, { color: subtleTextColor }]}>by {recipe.creatorName}</ThemedText>
-              <ThemedText style={[styles.meta, { color: subtleTextColor }]}>{recipe.difficulty} · {recipe.cookingTime} · {recipe.servings} servings</ThemedText>
+              <ThemedText style={[styles.meta, { color: subtleTextColor }]}>
+                {[recipe.difficulty, recipe.cookingTime, recipe.servings ? `${recipe.servings} servings` : ''].filter(Boolean).join(' · ')}
+              </ThemedText>
               <ThemedText style={[styles.summary, { color: textColor }]} numberOfLines={2}>{recipe.description}</ThemedText>
             </Pressable>
 

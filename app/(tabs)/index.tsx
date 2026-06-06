@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
@@ -12,6 +12,11 @@ import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function HomeScreen() {
   const recipes = useRecipeStore((state) => state.recipes);
+  const fetchRecipes = useRecipeStore((state) => state.fetchRecipes);
+
+  useEffect(() => {
+    if (recipes.length === 0) fetchRecipes();
+  }, [fetchRecipes, recipes.length]);
   const sortedRecipes = useMemo(
     () => [...recipes].sort((a, b) => a.name.localeCompare(b.name)),
     [recipes],

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -36,23 +38,19 @@ const TIMELINE_STEPS: TimelineStep[] = [
     title: 'Ingredients',
     subtitle: 'Ingredients and recipe steps',
   },
-  {
-    number: 3,
-    title: 'Details',
-    subtitle: 'Time, difficulty and servings',
-  },
+  // {
+  //   number: 3,
+  //   title: 'Details',
+  //   subtitle: 'Time, difficulty and servings',
+  // },
 ];
 
 const initialIngredients: EditableItem[] = [
-  { id: 'ingredient-1', value: '2 oz gin' },
-  { id: 'ingredient-2', value: '1 oz sweet vermouth' },
-  { id: 'ingredient-3', value: '1 oz Campari' },
+  { id: 'ingredient-1', value: '' },
 ];
 
 const initialSteps: EditableItem[] = [
-  { id: 'step-1', value: 'Add all ingredients to a mixing glass with ice.' },
-  { id: 'step-2', value: 'Stir until well chilled.' },
-  { id: 'step-3', value: 'Strain into a chilled glass and garnish.' },
+  { id: 'step-1', value: '' },
 ];
 
 export default function CreateRecipeScreen() {
@@ -86,13 +84,10 @@ export default function CreateRecipeScreen() {
   const [recipeImage, setRecipeImage] = useState<ImageSourcePropType | null>(null);
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [recipeSteps, setRecipeSteps] = useState(initialSteps);
-  const [cookingTime, setCookingTime] = useState('');
-  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
-  const [servings, setServings] = useState('2');
   const [stepError, setStepError] = useState('');
 
   const canGoBack = currentStep > 1;
-  const canGoForward = currentStep < 3;
+  const canGoForward = currentStep < 2;
 
   const validateStep = (step: number): boolean => {
     setStepError('');
@@ -195,9 +190,6 @@ export default function CreateRecipeScreen() {
       image: recipeImage ?? undefined,
       ingredients: ingredients.map((ingredient) => ingredient.value).filter(Boolean),
       steps: recipeSteps.map((step) => step.value).filter(Boolean),
-      cookingTime: cookingTime.trim() || '5 min',
-      difficulty,
-      servings: servings.trim() || '1',
     };
 
     if (editingRecipe) {
@@ -216,9 +208,6 @@ export default function CreateRecipeScreen() {
     setRecipeImage(null);
     setIngredients(initialIngredients);
     setRecipeSteps(initialSteps);
-    setCookingTime('');
-    setDifficulty('Medium');
-    setServings('2');
     setCurrentStep(1);
     setStepError('');
   };
@@ -243,9 +232,6 @@ export default function CreateRecipeScreen() {
           value,
         })),
       );
-      setCookingTime(editingRecipe.cookingTime);
-      setDifficulty(editingRecipe.difficulty);
-      setServings(editingRecipe.servings);
       setCurrentStep(1);
       populatedForId.current = editingRecipeId;
       setStepError('');
@@ -259,6 +245,7 @@ export default function CreateRecipeScreen() {
   }, [editingRecipeId, editingRecipe]);
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
 
       <ThemedView style={[styles.timelineCard, { backgroundColor: sectionBackground, borderColor }]}> 
@@ -420,60 +407,7 @@ export default function CreateRecipeScreen() {
         </ThemedView>
       ) : null}
 
-      {currentStep === 3 ? (
-        <ThemedView style={[styles.card, { backgroundColor: sectionBackground, borderColor }]}> 
-
-          <View style={styles.fieldGroup}>
-            <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Difficulty</ThemedText>
-            <View style={styles.difficultyContainer}>
-              {(['Easy', 'Medium', 'Hard'] as const).map((level) => {
-                const isSelected = difficulty === level;
-                return (
-                  <Pressable
-                    key={level}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isSelected }}
-                    onPress={() => setDifficulty(level)}
-                    style={({ pressed }) => [
-                      styles.difficultyButton,
-                      {
-                        borderColor,
-                        backgroundColor: isSelected ? (isDark ? Colors.dark.tertiary : Colors.light.tertiary) : fieldBackground,
-                      },
-                      pressed && styles.pressed,
-                    ]}>
-                    <ThemedText 
-                      type="defaultSemiBold" 
-                      style={{ color: isSelected ? '#FFFFFF' : textColor }}
-                    >
-                      {level}
-                    </ThemedText>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <ThemedText style={[styles.fieldLabel, { color: subtleTextColor }]}>Servings</ThemedText>
-            <TextInput
-              value={servings}
-              onChangeText={setServings}
-              keyboardType="number-pad"
-              placeholder="4"
-              placeholderTextColor={subtleTextColor}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: fieldBackground,
-                  borderColor,
-                  color: textColor,
-                },
-              ]}
-            />
-          </View>
-        </ThemedView>
-      ) : null}
+      {/* Step 3 (Details) removed */}
 
       <View style={styles.actionsRow}>
         {canGoBack ? (
@@ -504,6 +438,7 @@ export default function CreateRecipeScreen() {
         )}
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

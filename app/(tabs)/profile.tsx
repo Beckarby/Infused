@@ -8,39 +8,42 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
-import { toProcessService } from '@/services/toProcess';
+// import { toProcessService } from '@/services/toProcess';
 import { useAuthStore } from '@/store/UseAuthStore';
 import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useProfileStore } from '@/store/UseProfileStore';
 
 export default function ProfileScreen() {
+  const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const name = useProfileStore((state) => state.name);
   const handle = useProfileStore((state) => state.handle);
   const description = useProfileStore((state) => state.description);
-  const resetProfile = useProfileStore((state) => state.resetProfile);
+  // const resetProfile = useProfileStore((state) => state.resetProfile);
   const collections = useCollectionStore((state) => state.collections);
   const deleteCollection = useCollectionStore((state) => state.deleteCollection);
-  const resetCollections = useCollectionStore((state) => state.resetCollections);
+  // const resetCollections = useCollectionStore((state) => state.resetCollections);
+  const fetchCollections = useCollectionStore((state) => state.fetchCollections);
 
-  const [recipeCount, setRecipeCount] = useState<number | null>(null);
-  const [followerCount, setFollowerCount] = useState<number | null>(null);
+  // const [recipeCount, setRecipeCount] = useState<number | null>(null);
+  // const [followerCount, setFollowerCount] = useState<number | null>(null);
 
   useEffect(() => {
-    async function fetchStats() {
-      try {
-        const [recipesRes, followersRes] = await Promise.all([
-          toProcessService.getAllRecipesOfUser({}),
-          toProcessService.getFollowers({}),
-        ]);
-        if (recipesRes?.length !== undefined) setRecipeCount(recipesRes.length);
-        if (followersRes?.length !== undefined) setFollowerCount(followersRes.length);
-      } catch {
-        // API not available yet
-      }
-    }
-    fetchStats();
-  }, []);
+    fetchCollections();
+    // async function fetchStats() {
+    //   try {
+    //     const [recipesRes, followersRes] = await Promise.all([
+    //       toProcessService.getAllRecipesOfUser(),
+    //       toProcessService.getFollowers([{}]),
+    //     ]);
+    //     if (recipesRes?.length !== undefined) setRecipeCount(recipesRes.length);
+    //     if (followersRes?.length !== undefined) setFollowerCount(followersRes.length);
+    //   } catch {
+    //     // API not available yet
+    //   }
+    // }
+    // fetchStats();
+  }, [fetchCollections]);
 
   const theme = useColorScheme() ?? 'light';
   const isDark = theme === 'dark';
@@ -53,7 +56,9 @@ export default function ProfileScreen() {
       <ThemedView style={styles.headerCard} lightColor={Colors.light.secondary} darkColor={Colors.dark.tertiary}>
         <ThemedView style={styles.avatar} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
           <ThemedText type="title" style={styles.avatarText}>
-            JD
+            {user
+              ? `${user.users_first_name[0]}${user.users_last_name[0]}`.toUpperCase()
+              : '?'}
           </ThemedText>
         </ThemedView>
 
@@ -77,7 +82,7 @@ export default function ProfileScreen() {
         </ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.statsRow}>
+      {/* <ThemedView style={styles.statsRow}>
         <ThemedView style={styles.statCard} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
           <ThemedText type="title" style={styles.statValue}>
             {recipeCount ?? '...'}
@@ -90,7 +95,7 @@ export default function ProfileScreen() {
           </ThemedText>
           <ThemedText style={styles.statLabel}>Followers</ThemedText>
         </ThemedView>
-      </ThemedView>
+      </ThemedView> */}
 
       <ThemedView style={styles.section}>
         <CollectionsList
