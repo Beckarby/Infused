@@ -1,3 +1,4 @@
+import * as ImageManipulator from 'expo-image-manipulator';
 import type { ImageSourcePropType } from 'react-native';
 import { create } from 'zustand';
 
@@ -10,8 +11,18 @@ function getImageUri(image: ImageSourcePropType | undefined | null): string | nu
   return 'uri' in image ? (image as { uri?: string }).uri ?? null : null;
 }
 
+async function compressImage(uri: string): Promise<string> {
+  const result = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { width: 1024 } }],
+    { compress: 0.7, format: ImageManipulator.SaveFormat.PNG },
+  );
+  return result.uri;
+}
+
 async function uriToBase64(uri: string): Promise<string> {
-  const response = await fetch(uri);
+  const compressed = await compressImage(uri);
+  const response = await fetch(compressed);
   const blob = await response.blob();
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
