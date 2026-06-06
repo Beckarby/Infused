@@ -25,7 +25,7 @@ export default function RecipeScreen() {
 
 	const pageBackground = isDark ? Colors.dark.background : Colors.light.background;
 	const cardBackground = isDark ? Colors.dark.neutral : Colors.light.neutral;
-	const sectionBackground = isDark ? Colors.dark.tertiary : Colors.light.tertiary;
+	const sectionBackground = isDark ? Colors.dark.tertiary : Colors.light.secondary;
 	const textColor = isDark ? Colors.dark.text : Colors.light.text;
 	const subtleTextColor = isDark ? Colors.dark.primary : Colors.light.primary;
 	const borderColor = isDark ? 'rgba(249, 247, 242, 0.18)' : 'rgba(74, 55, 40, 0.14)';
