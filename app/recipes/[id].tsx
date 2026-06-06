@@ -1,20 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function RecipeScreen() {
 	const params = useLocalSearchParams<{ id?: string | string[] }>();
 	const recipes = useRecipeStore((state) => state.recipes);
-	const collections = useCollectionStore((state) => state.collections);
-	const addRecipeToCollection = useCollectionStore((state) => state.addRecipeToCollection);
 	const recipe = useMemo(() => {
 		const normalizedId = Array.isArray(params.id) ? params.id[0] : params.id;
 		return recipes.find((item) => item.id === normalizedId);
@@ -59,15 +56,21 @@ export default function RecipeScreen() {
 					<ThemedText style={[styles.body, { color: subtleTextColor }]}>{recipe.description}</ThemedText>
 
 					<View style={styles.metaRow}>
-						<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
-							<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.difficulty}</ThemedText>
-						</ThemedView>
-						<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
-							<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.cookingTime}</ThemedText>
-						</ThemedView>
-						<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
-							<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.servings} servings</ThemedText>
-						</ThemedView>
+						{recipe.difficulty ? (
+							<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
+								<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.difficulty}</ThemedText>
+							</ThemedView>
+						) : null}
+						{recipe.cookingTime ? (
+							<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
+								<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.cookingTime}</ThemedText>
+							</ThemedView>
+						) : null}
+						{recipe.servings ? (
+							<ThemedView style={[styles.metaChip, { backgroundColor: sectionBackground }]}>
+								<ThemedText type="defaultSemiBold" style={[styles.metaText, { color: textColor }]}>{recipe.servings} servings</ThemedText>
+							</ThemedView>
+						) : null}
 					</View>
 
 					<ThemedText style={[styles.creatorText, { color: subtleTextColor }]}>Created by {recipe.creatorName}</ThemedText>
@@ -100,20 +103,7 @@ export default function RecipeScreen() {
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => {
-					Alert.alert(
-						'Add to collection',
-						'Choose a collection to save this recipe into.',
-						[
-							{ text: 'Cancel', style: 'cancel' },
-							...collections.map((collection) => ({
-								text: collection.name,
-								onPress: () => {
-									addRecipeToCollection(collection.id, recipe.id);
-									Alert.alert('Saved', `${recipe.name} was added to ${collection.name}.`);
-								},
-							})),
-						],
-					);
+					router.push(`/modal?mode=add-to-collection&recipeId=${recipe.id}`);
 				}}
 				style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
 				<ThemedText type="defaultSemiBold" style={styles.primaryButtonText}>Add to collection</ThemedText>
@@ -128,6 +118,7 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		padding: 16,
+		paddingBottom: 50,
 		gap: 14,
 	},
 	screen: {
