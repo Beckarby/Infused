@@ -51,9 +51,9 @@ export function CollectionsList({
 
       <View style={styles.list}>
         {hasCollections ? (
-          collections.map((collection) => (
+          collections.map((collection, index) => (
             <ThemedView
-              key={collection.id}
+              key={collection.id || `collection-${index}`}
               style={[styles.collectionCard, { borderColor }]}
               lightColor={Colors.light.neutral}
               darkColor={Colors.dark.neutral}>
