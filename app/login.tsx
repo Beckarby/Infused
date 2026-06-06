@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -37,9 +37,13 @@ export default function LoginScreen() {
   });
 
   const { login, isLoading, error } = useAuthStore();
+  const router = useRouter();
 
-  const onSubmit = (data: FormData) => {
-    login(data.email, data.password);
+  const onSubmit = async (data: FormData) => {
+    await login(data.email, data.password);
+    if (useAuthStore.getState().isAuthenticated) {
+      router.replace('/');
+    }
   };
 
   return (

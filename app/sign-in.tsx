@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -38,9 +38,13 @@ export default function SignInScreen() {
   });
 
   const { signIn, isLoading, error } = useAuthStore();
+  const router = useRouter();
 
-  const onSubmit = (data: FormData) => {
-    signIn(data.fullName, data.email, data.password);
+  const onSubmit = async (data: FormData) => {
+    await signIn(data.fullName, data.email, data.password);
+    if (useAuthStore.getState().isAuthenticated) {
+      router.replace('/');
+    }
   };
 
   return (

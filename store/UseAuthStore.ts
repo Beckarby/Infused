@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface AuthState {
     isLoading: boolean;
     error: string | null;
+    isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     signIn: (fullName: string, email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -11,6 +12,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
     isLoading: false,
     error: null,
+    isAuthenticated: false,
 
     login: async (email, password) => {
         set({ isLoading: true, error: null });
@@ -19,7 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             if (email === 'test@test.com' && password === 'password') {
-                set({ isLoading: false, error: null });
+                set({ isLoading: false, error: null, isAuthenticated: true });
             } else {
                 throw new Error('Invalid email or password');
             }
@@ -35,7 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             if (fullName && email && password) {
-                set({ isLoading: false, error: null });
+                set({ isLoading: false, error: null, isAuthenticated: true });
             } else {
                 throw new Error('Please fill in all fields');
             }
@@ -45,6 +47,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: () => {
-        set({ isLoading: false, error: null });
+        set({ isLoading: false, error: null, isAuthenticated: false });
     },
 }));
