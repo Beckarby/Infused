@@ -6,17 +6,10 @@ import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { COLLECTION_RECIPES } from '@/constants/mock-recipes';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useRecipeStore } from '@/store/UseRecipeStore';
-
-type RecipeItem = {
-  id: string;
-  name: string;
-};
-
-const INITIAL_RECIPES: RecipeItem[] = COLLECTION_RECIPES;
 
 export default function CollectionScreen() {
   const params = useLocalSearchParams<{ collectionId?: string | string[] }>();
@@ -24,6 +17,18 @@ export default function CollectionScreen() {
     const value = params.collectionId;
     return Array.isArray(value) ? value[0] : value;
   }, [params.collectionId]);
+
+  const collection = useCollectionStore((state) =>
+    state.collections.find((c) => c.id === collectionId),
+  );
+  const collectionRecipeIds = useCollectionStore(
+    (state) => state.collectionRecipes[collectionId ?? ''] ?? [],
+  );
+  const updateCollectionName = useCollectionStore((state) => state.updateCollectionName);
+  const removeRecipeFromCollection = useCollectionStore(
+    (state) => state.removeRecipeFromCollection,
+  );
+  const allRecipes = useRecipeStore((state) => state.recipes);
 
   const theme = useColorScheme() ?? 'light';
   const isDark = theme === 'dark';
@@ -37,32 +42,30 @@ export default function CollectionScreen() {
   const inputBackground = isDark ? 'rgba(255, 255, 255, 0.06)' : '#FFFFFF';
   const recipeBackground = isDark ? 'rgba(217, 197, 178, 0.08)' : 'rgba(74, 55, 40, 0.06)';
 
-  const [collectionName, setCollectionName] = useState('Summer Cocktails');
-  const [draftName, setDraftName] = useState(collectionName);
+  const [draftName, setDraftName] = useState(collection?.name ?? '');
   const [isEditingName, setIsEditingName] = useState(false);
-  const [recipes, setRecipes] = useState(INITIAL_RECIPES);
-  const allRecipes = useRecipeStore((state) => state.recipes);
 
   const visibleRecipes = useMemo(
-    () => recipes.filter((recipe) => allRecipes.some((item) => item.id === recipe.id)),
-    [allRecipes, recipes],
+    () => allRecipes.filter((recipe) => collectionRecipeIds.includes(recipe.id)),
+    [allRecipes, collectionRecipeIds],
   );
 
   const beginEditName = () => {
-    setDraftName(collectionName);
+    setDraftName(collection?.name ?? '');
     setIsEditingName(true);
   };
 
   const saveName = () => {
     const nextName = draftName.trim();
-    if (nextName) {
-      setCollectionName(nextName);
+    if (nextName && collectionId) {
+      updateCollectionName(collectionId, nextName);
     }
     setIsEditingName(false);
   };
 
-  const deleteRecipe = (recipeId: string) => {
-    setRecipes((currentRecipes) => currentRecipes.filter((recipe) => recipe.id !== recipeId));
+  const handleDeleteRecipe = (recipeId: string) => {
+    if (!collectionId) return;
+    removeRecipeFromCollection(collectionId, recipeId);
   };
 
   return (
@@ -90,7 +93,7 @@ export default function CollectionScreen() {
             />
           ) : (
             <ThemedText type="title" style={[styles.collectionName, { color: textColor }]}> 
-              {collectionName}
+              {collection?.name}
             </ThemedText>
           )}
 
@@ -149,7 +152,7 @@ export default function CollectionScreen() {
                       {
                         text: 'Delete',
                         style: 'destructive',
-                        onPress: () => deleteRecipe(recipe.id),
+                        onPress: () => handleDeleteRecipe(recipe.id),
                       },
                     ]);
                   }}

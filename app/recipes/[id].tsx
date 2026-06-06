@@ -5,14 +5,16 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-nat
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { MOCK_COLLECTION_NAMES } from '@/constants/mock-recipes';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useRecipeStore } from '@/store/UseRecipeStore';
 
 export default function RecipeScreen() {
 	const params = useLocalSearchParams<{ id?: string | string[] }>();
 	const recipes = useRecipeStore((state) => state.recipes);
+	const collections = useCollectionStore((state) => state.collections);
+	const addRecipeToCollection = useCollectionStore((state) => state.addRecipeToCollection);
 	const recipe = useMemo(() => {
 		const normalizedId = Array.isArray(params.id) ? params.id[0] : params.id;
 		return recipes.find((item) => item.id === normalizedId);
@@ -103,10 +105,11 @@ export default function RecipeScreen() {
 						'Choose a collection to save this recipe into.',
 						[
 							{ text: 'Cancel', style: 'cancel' },
-							...MOCK_COLLECTION_NAMES.map((collectionName) => ({
-								text: collectionName,
+							...collections.map((collection) => ({
+								text: collection.name,
 								onPress: () => {
-									Alert.alert('Saved', `${recipe.name} was added to ${collectionName}.`);
+									addRecipeToCollection(collection.id, recipe.id);
+									Alert.alert('Saved', `${recipe.name} was added to ${collection.name}.`);
 								},
 							})),
 						],
