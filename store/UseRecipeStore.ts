@@ -1,46 +1,7 @@
-import * as ImageManipulator from 'expo-image-manipulator';
-import type { ImageSourcePropType } from 'react-native';
 import { create } from 'zustand';
 
 import type { MockRecipe } from '@/constants/mock-recipes';
 import { toProcessService } from '@/services/toProcess';
-
-function getImageUri(image: ImageSourcePropType | undefined | null): string | null {
-  if (!image || typeof image === 'number') return null;
-  if (Array.isArray(image)) return image[0]?.uri ?? null;
-  return 'uri' in image ? (image as { uri?: string }).uri ?? null : null;
-}
-
-async function compressImage(uri: string): Promise<string> {
-  const result = await ImageManipulator.manipulateAsync(
-    uri,
-    [{ resize: { width: 1024 } }],
-    { compress: 0.7, format: ImageManipulator.SaveFormat.PNG },
-  );
-  return result.uri;
-}
-
-async function uriToBase64(uri: string): Promise<string> {
-  const compressed = await compressImage(uri);
-  const response = await fetch(compressed);
-  const blob = await response.blob();
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function imageToBase64(image: ImageSourcePropType | undefined | null): Promise<string | null> {
-  const uri = getImageUri(image);
-  if (!uri) return null;
-  try {
-    return await uriToBase64(uri);
-  } catch {
-    return null;
-  }
-}
 
 type ApiRecipe = {
   recipe_id: string;
@@ -98,11 +59,10 @@ export const useRecipeStore = create<RecipeState>((set) => ({
     // add locally immediately
     set((state) => ({ recipes: [localRecipe, ...state.recipes] }));
     try {
-      const image = await imageToBase64(recipe.image);
       await toProcessService.createRecipe([{
         name: recipe.name,
         description: recipe.description || '',
-        image,
+        image: null,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
       }]);
@@ -134,8 +94,7 @@ export const useRecipeStore = create<RecipeState>((set) => ({
           if (key === 'ingredients' || key === 'steps') {
             await toProcessService.updateRecipe([{ option, value: raw, id: recipeId }]);
           } else if (key === 'image') {
-            const value = await imageToBase64(raw as ImageSourcePropType | undefined | null);
-            await toProcessService.updateRecipe([{ option, value, id: recipeId }]);
+            // skip image for now
           } else {
             await toProcessService.updateRecipe([{ option, value: String(raw ?? ''), id: recipeId }]);
           }
