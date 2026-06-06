@@ -20,14 +20,16 @@ api.interceptors.request.use(
     },
 )
 
+const retriedRequests = new WeakMap();
+
 api.interceptors.response.use(
     (response) => {
         return response;
     },
     (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+        if (error.response?.status === 401 && !retriedRequests.get(originalRequest)) {
+            retriedRequests.set(originalRequest, true);
             router.push('/login');
         }
         return Promise.reject(error);

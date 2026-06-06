@@ -12,7 +12,6 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { Link, useRouter } from 'expo-router';
 
-import { FadeIn } from '@/components/fade-in';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -60,7 +59,7 @@ export default function SignInScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
-      <FadeIn><View style={[styles.card, { backgroundColor: colors.neutral }]}>
+      <View style={[styles.card, { backgroundColor: colors.neutral }]}>
         
         <ThemedText
           type="title"
@@ -446,7 +445,7 @@ export default function SignInScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-      </View></FadeIn>
+      </View>
     </ThemedView>
     </KeyboardAvoidingView>
   );

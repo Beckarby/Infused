@@ -13,7 +13,6 @@ import {
 
 import { Link, useRouter } from 'expo-router';
 
-import { FadeIn } from '@/components/fade-in';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -55,7 +54,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
     <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
-      <FadeIn><View style={[styles.card, { backgroundColor: colors.neutral }]}>
+      <View style={[styles.card, { backgroundColor: colors.neutral }]}>
 
         <ThemedText
           type="title"
@@ -285,7 +284,7 @@ export default function LoginScreen() {
              
 
         </View>
-      </View></FadeIn>
+      </View>
     </ThemedView>
     </KeyboardAvoidingView>
   );
