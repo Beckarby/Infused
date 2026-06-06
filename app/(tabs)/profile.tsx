@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TouchableOpacity, View, useColorScheme } from 'react-native';
 
 import { CollectionsList } from '@/components/collections-list';
@@ -7,10 +8,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
+import { toProcessService } from '@/services/toProcess';
 import { useAuthStore } from '@/store/UseAuthStore';
 import { useCollectionStore } from '@/store/UseCollectionStore';
 import { useProfileStore } from '@/store/UseProfileStore';
-
 
 export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
@@ -22,25 +23,28 @@ export default function ProfileScreen() {
   const deleteCollection = useCollectionStore((state) => state.deleteCollection);
   const resetCollections = useCollectionStore((state) => state.resetCollections);
 
+  const [recipeCount, setRecipeCount] = useState<number | null>(null);
+  const [followerCount, setFollowerCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [recipesRes, followersRes] = await Promise.all([
+          toProcessService.getAllRecipesOfUser({}),
+          toProcessService.getFollowers({}),
+        ]);
+        if (recipesRes?.length !== undefined) setRecipeCount(recipesRes.length);
+        if (followersRes?.length !== undefined) setFollowerCount(followersRes.length);
+      } catch {
+        // API not available yet
+      }
+    }
+    fetchStats();
+  }, []);
+
   const theme = useColorScheme() ?? 'light';
   const isDark = theme === 'dark';
   const textColor = isDark ? Colors.dark.text : Colors.light.text;
-
-    const deleteProfile = () => {
-    Alert.alert('Delete profile', 'This will remove your profile data and sign you out. Do you want to continue?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          resetProfile();
-          resetCollections();
-          logout();
-          router.replace('/login');
-        },
-      },
-    ]);
-  };
 
   return (
     <ParallaxScrollView>
@@ -76,13 +80,13 @@ export default function ProfileScreen() {
       <ThemedView style={styles.statsRow}>
         <ThemedView style={styles.statCard} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
           <ThemedText type="title" style={styles.statValue}>
-            128
+            {recipeCount ?? '...'}
           </ThemedText>
           <ThemedText style={styles.statLabel}>Recipes</ThemedText>
         </ThemedView>
         <ThemedView style={styles.statCard} lightColor={Colors.light.neutral} darkColor={Colors.dark.neutral}>
           <ThemedText type="title" style={styles.statValue}>
-            2.4k
+            {followerCount ?? '...'}
           </ThemedText>
           <ThemedText style={styles.statLabel}>Followers</ThemedText>
         </ThemedView>
