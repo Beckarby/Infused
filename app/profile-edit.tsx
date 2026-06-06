@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +8,8 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useProfileStore } from '@/store/UseProfileStore';
+import { useCollectionStore } from '@/store/UseCollectionStore';
+import { useAuthStore } from '@/store/UseAuthStore';
 
 export default function ProfileEditScreen() {
   const theme = useColorScheme() ?? 'light';
@@ -16,6 +18,10 @@ export default function ProfileEditScreen() {
   const handle = useProfileStore((state) => state.handle);
   const description = useProfileStore((state) => state.description);
   const updateProfile = useProfileStore((state) => state.updateProfile);
+  const resetProfile = useProfileStore((state) => state.resetProfile);
+  const resetCollections = useCollectionStore((state) => state.resetCollections);
+  const logout = useAuthStore((state) => state.logout);
+  
 
   const [draftName, setDraftName] = useState(name);
   const [draftHandle, setDraftHandle] = useState(handle);
@@ -43,6 +49,22 @@ export default function ProfileEditScreen() {
 
     router.back();
   };
+
+  const deleteProfile = () => {
+    Alert.alert('Delete profile', 'This will remove your profile data and sign you out. Do you want to continue?', [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => {
+              resetProfile();
+              resetCollections();
+              logout();
+              router.replace('/login');
+            },
+          },
+        ]);
+  }
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: pageBackground }]} contentContainerStyle={styles.content}>
@@ -93,6 +115,16 @@ export default function ProfileEditScreen() {
           </ThemedText>
         </Pressable>
       </ThemedView>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Delete profile"
+        onPress={deleteProfile}
+        style={({ pressed }) => [styles.deleteProfileButton, pressed && styles.buttonPressed]}>
+        <ThemedText type="defaultSemiBold" style={styles.deleteProfileButtonText}>
+          Delete profile
+        </ThemedText>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -148,6 +180,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.label,
   },
   pressed: {
+    opacity: 0.85,
+  },
+  deleteProfileButton: {
+    borderRadius: 18,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#540212',
+  },
+  deleteProfileButtonText: {
+    color: Colors.light.background,
+  },
+  buttonPressed: {
     opacity: 0.85,
   },
 });

@@ -116,15 +116,7 @@ export default function ProfileScreen() {
         />
       </ThemedView>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Delete profile"
-        onPress={deleteProfile}
-        style={({ pressed }) => [styles.deleteProfileButton, pressed && styles.buttonPressed]}>
-        <ThemedText type="defaultSemiBold" style={styles.deleteProfileButtonText}>
-          Delete profile
-        </ThemedText>
-      </Pressable>
+      
 
       <ThemedView style={styles.footerSpacer} />
 
@@ -139,9 +131,6 @@ export default function ProfileScreen() {
           Log out
         </ThemedText>
       </TouchableOpacity>
-
-    
-
     </ThemedView>
     </ParallaxScrollView>
   );
@@ -237,16 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  deleteProfileButton: {
-    borderRadius: 18,
-    paddingVertical: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#540212',
-  },
-  deleteProfileButtonText: {
-    color: Colors.light.background,
-  },
+  
   logoutButton: {
     marginTop: 'auto',
     borderRadius: 18,
