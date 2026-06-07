@@ -120,7 +120,7 @@ export default function LoginScreen() {
           <Controller
             control={control}
             name="username"
-            rules={{ required: 'Username is required' }}
+            rules={{ validate: (value: string) => value.trim().length > 0 || 'Username is required' }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[
@@ -173,7 +173,7 @@ export default function LoginScreen() {
             control={control}
             name="password"
             rules={{
-              required: 'Password is required',
+              validate: (value: string) => value.trim().length > 0 || 'Password is required',
               minLength: {
                 value: 6,
                 message: 'Password must be at least 6 characters',

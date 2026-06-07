@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+
 import { toProcessService } from '@/services/toProcess';
+import { useRecipeStore } from '@/store/UseRecipeStore';
 
 type CollectionItem = {
   id: string;
@@ -81,10 +83,28 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
   },
 
   deleteCollection: async (collectionId) => {
+    const deletedRecipeIds = get().collectionRecipes[collectionId] ?? [];
+    console.log('locally deleting ids:', deletedRecipeIds);
+
+    useRecipeStore.setState({ isSyncing: true });
+
+    useRecipeStore.setState((state) => ({
+      recipes: state.recipes.filter((r) => !deletedRecipeIds.includes(r.id)),
+    }));
     try {
       await toProcessService.deleteGroup([{ groupId: collectionId }]);
+      
       await get().fetchCollections();
+
+      await new Promise((r) => setTimeout(r, 800));
+
+      useRecipeStore.setState({ isSyncing: false });
+
+      await useRecipeStore.getState().fetchRecipes();
     } catch {
+
+      useRecipeStore.setState({ isSyncing: false });
+
       set((state) => {
         const { [collectionId]: _, ...remaining } = state.collectionRecipes;
         return {

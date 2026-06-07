@@ -82,6 +82,7 @@ export default function CreateRecipeScreen() {
   const [recipeTitle, setRecipeTitle] = useState('');
   const [recipeDescription, setRecipeDescription] = useState('');
   const [recipeImage, setRecipeImage] = useState<ImageSourcePropType | null>(null);
+  const [recipeImageBase64, setRecipeImageBase64] = useState<string | null>(null);
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [recipeSteps, setRecipeSteps] = useState(initialSteps);
   const [stepError, setStepError] = useState('');
@@ -151,13 +152,16 @@ export default function CreateRecipeScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
+      base64: true,
     });
 
     if (result.canceled || !result.assets?.length) {
       return;
     }
 
-    setRecipeImage({ uri: result.assets[0].uri });
+    const asset = result.assets[0];
+    setRecipeImage({ uri: asset.uri });
+    setRecipeImageBase64(asset.base64 ?? null);
   };
 
   const takeRecipeImage = async () => {
@@ -172,30 +176,34 @@ export default function CreateRecipeScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
+      base64: true,
     });
 
     if (result.canceled || !result.assets?.length) {
       return;
     }
 
-    setRecipeImage({ uri: result.assets[0].uri });
+    const asset = result.assets[0];
+    setRecipeImage({ uri: asset.uri });
+    setRecipeImageBase64(asset.base64 ?? null);
   };
 
-  const uploadRecipe = () => {
+  const uploadRecipe = async () => {
     if (!validateStep(1) || !validateStep(2)) return;
+    const imageBase64 = recipeImageBase64;
     const payload = {
       creatorName: editingRecipe?.creatorName ?? 'You',
       name: recipeTitle.trim(),
       description: recipeDescription.trim(),
-      image: recipeImage ?? undefined,
+      image: (imageBase64 ?? undefined) as unknown as ImageSourcePropType,
       ingredients: ingredients.map((ingredient) => ingredient.value).filter(Boolean),
       steps: recipeSteps.map((step) => step.value).filter(Boolean),
     };
 
     if (editingRecipe) {
-      updateRecipe(editingRecipe.id, payload);
+      await updateRecipe(editingRecipe.id, payload);
     } else {
-      addRecipe(payload);
+      await addRecipe(payload);
     }
 
     resetForm();
@@ -206,6 +214,7 @@ export default function CreateRecipeScreen() {
     setRecipeTitle('');
     setRecipeDescription('');
     setRecipeImage(null);
+    setRecipeImageBase64(null);
     setIngredients(initialIngredients);
     setRecipeSteps(initialSteps);
     setCurrentStep(1);
@@ -220,6 +229,7 @@ export default function CreateRecipeScreen() {
       setRecipeTitle(editingRecipe.name);
       setRecipeDescription(editingRecipe.description);
       setRecipeImage(editingRecipe.image ?? null);
+      setRecipeImageBase64(null);
       setIngredients(
         editingRecipe.ingredients.map((value, index) => ({
           id: `ingredient-${index + 1}`,

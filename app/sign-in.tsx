@@ -125,7 +125,7 @@ export default function SignInScreen() {
           <Controller
             control={control}
             name="username"
-            rules={{ required: 'Username is required' }}
+            rules={{ validate: (value: string) => value.trim().length > 0 || 'Username is required' }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[
@@ -166,7 +166,7 @@ export default function SignInScreen() {
             <ThemedText
               type="defaultSemiBold"
               style={[
-                styles.label,
+                styles.label, 
                 {
                   color: colors.text,
                   fontFamily: Fonts.label,
@@ -178,7 +178,7 @@ export default function SignInScreen() {
             <Controller
               control={control}
               name="firstName"
-              rules={{ required: 'First name is required' }}
+              rules={{ validate: (value: string) => value.trim().length > 0 || 'First name is required' }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={[
@@ -229,7 +229,7 @@ export default function SignInScreen() {
             <Controller
               control={control}
               name="lastName"
-              rules={{ required: 'Last name is required' }}
+              rules={{ validate: (value: string) => value.trim().length > 0 || 'Last name is required' }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   style={[
@@ -282,7 +282,7 @@ export default function SignInScreen() {
             control={control}
             name="email"
             rules={{
-              required: 'Email is required',
+              validate: (value: string) => value.trim().length > 0 || 'Email is required',
               pattern: {
                 value: /\S+@\S+\.\S+/,
                 message: 'Enter a valid email address',
@@ -341,7 +341,7 @@ export default function SignInScreen() {
             control={control}
             name="password"
             rules={{
-              required: 'Password is required',
+              validate: (value: string) => value.trim().length > 0 || 'Password is required',
               minLength: {
                 value: 6,
                 message: 'Password must be at least 6 characters',

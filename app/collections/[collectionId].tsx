@@ -121,7 +121,6 @@ export default function CollectionScreen() {
         ) : null}
 
         <ThemedText style={[styles.helperText, { color: subtleTextColor }]}>Tap the pencil to rename this collection.</ThemedText>
-        <ThemedText style={[styles.metaText, { color: subtleTextColor }]}>Collection {collectionId}</ThemedText>
       </ThemedView>
 
       <ThemedView style={[styles.cardRecipes]}> 

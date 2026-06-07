@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { readAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import type { MockRecipe } from '@/constants/mock-recipes';
 import { toProcessService } from '@/services/toProcess';
 
@@ -21,6 +22,7 @@ type RecipeDraft = Omit<MockRecipe, 'id'> & {
 interface RecipeState {
   recipes: MockRecipe[];
   isLoading: boolean;
+  isSyncing: boolean;
   fetchRecipes: () => Promise<void>;
   addRecipe: (recipe: RecipeDraft) => Promise<string>;
   updateRecipe: (recipeId: string, updates: Partial<Omit<MockRecipe, 'id'>>) => Promise<void>;
@@ -39,11 +41,27 @@ function mapApiRecipe(api: ApiRecipe): MockRecipe {
   };
 }
 
-export const useRecipeStore = create<RecipeState>((set) => ({
+async function imageToBase64(image: MockRecipe['image'] | string): Promise<string | null> {
+  if (!image) return null;
+  if (typeof image === 'string') return image;
+  if (typeof image !== 'object' || Array.isArray(image)) return null;
+  const uri = (image as { uri?: string }).uri;
+  if (typeof uri !== 'string' || uri.startsWith('http')) return null;
+  try {
+    return await readAsStringAsync(uri, { encoding: EncodingType.Base64 });
+  } catch {
+    return null;
+  }
+}
+
+export const useRecipeStore = create<RecipeState>((set, get) => ({
   recipes: [],
   isLoading: false,
+  isSyncing: false,
 
   fetchRecipes: async () => {
+    if (get().isLoading) return;
+    
     set({ isLoading: true });
     try {
       const data = await toProcessService.searchRecipes([{ searchTerm: '' }]) as { output?: ApiRecipe[] };
@@ -59,10 +77,11 @@ export const useRecipeStore = create<RecipeState>((set) => ({
     // add locally immediately
     set((state) => ({ recipes: [localRecipe, ...state.recipes] }));
     try {
+      const imageBase64 = await imageToBase64(recipe.image);
       await toProcessService.createRecipe([{
         name: recipe.name,
         description: recipe.description || '',
-        image: null,
+        image: imageBase64,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
       }]);
@@ -94,7 +113,10 @@ export const useRecipeStore = create<RecipeState>((set) => ({
           if (key === 'ingredients' || key === 'steps') {
             await toProcessService.updateRecipe([{ option, value: raw, id: recipeId }]);
           } else if (key === 'image') {
-            // skip image for now
+            const base64 = await imageToBase64(raw as MockRecipe['image']);
+            if (base64 !== null) {
+              await toProcessService.updateRecipe([{ option, value: base64, id: recipeId }]);
+            }
           } else {
             await toProcessService.updateRecipe([{ option, value: String(raw ?? ''), id: recipeId }]);
           }

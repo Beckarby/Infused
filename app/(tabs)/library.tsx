@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -20,9 +20,11 @@ export default function LibraryScreen() {
 
   const myRecipes = recipes.filter((r) => r.creatorName === username);
 
-  useEffect(() => {
-    if (recipes.length === 0) fetchRecipes();
-  }, [fetchRecipes, recipes.length]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchRecipes();
+    }, [fetchRecipes]),
+  );
 
   const pageBackground = isDark ? Colors.dark.background : Colors.light.background;
   const cardBackground = isDark ? Colors.dark.neutral : Colors.light.neutral;
